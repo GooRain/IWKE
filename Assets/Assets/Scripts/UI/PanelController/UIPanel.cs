@@ -4,25 +4,32 @@ using UnityEngine;
 using UnityEngine.UI;
 using IWKE;
 
-public class UIPanel : MonoBehaviour, IUserInterfaceElement {
+public class UIPanel : MonoBehaviour, IUserInterfaceElement
+{
 
 	private Animator anim;
-	public event UIHandler OnHide= ()=> {};
+	public event UIHandler OnHide = () => { };
 
-	public Animator UIAnimator{
-		get{
-			if (anim == null)
+	public Animator UIAnimator
+	{
+		get
+		{
+			if(anim == null)
 				anim = GetComponent<Animator>();
 			return anim;
 		}
 	}
 
-	public void Show() {
-		UIAnimator.SetTrigger("Open");
+	public void Show()
+	{
+		//UIAnimator.SetTrigger("Open");
+		UIAnimator.SetBool("IsOpen", true);
 	}
 
-	public void Hide() {
-		UIAnimator.SetTrigger("Close");
-		OnHide();
+	public void Hide()
+	{
+		//UIAnimator.SetTrigger("Close");
+		UIAnimator.SetBool("IsOpen", false);
+		//OnHide();
 	}
 }
