@@ -8,11 +8,11 @@ namespace AssembleObject
 	public class ObjectMain : MonoBehaviour
 	{
 
-		public string Name;
+		public string soundName;
 
 		public float rotateSpeed = 5f;
 		[SerializeField]
-		private float doubleTapRecoil = 0.5f;
+		private float doubleTapRecoil = 0.25f;
 
 		private float doubleTapCurrentRecoil;
 		private int tapCount = 0;
@@ -23,6 +23,7 @@ namespace AssembleObject
 		private ObjectPart selectedPart;
 
 		private BoxCollider myCollider;
+		private Quaternion startRotation;
 
 		private void Awake()
 		{
@@ -36,11 +37,12 @@ namespace AssembleObject
 		{
 			parts = new List<ObjectPart>();
 			SetChildren();
+			startRotation = transform.rotation;
 		}
 
 		public void Disassemble()
 		{
-			StartCoroutine(PhysicalManipulation.Rotate(transform, transform.localRotation, Quaternion.identity, 1f));
+			StartCoroutine(PhysicalManipulation.Rotate(transform, transform.localRotation, startRotation, 1f));
 			foreach(var c in parts)
 			{
 				c.Disassemble();
@@ -66,7 +68,7 @@ namespace AssembleObject
 			HandleTouch();
 			if(assembled)
 			{
-				transform.RotateAround(transform.position, transform.up, .1f);
+				transform.RotateAround(transform.position, transform.up, rotateSpeed / 2 * Time.deltaTime);
 			}
 		}
 
@@ -80,6 +82,8 @@ namespace AssembleObject
 
 		public void SelectPart(ObjectPart part)
 		{
+			//StopAllCoroutines();
+			//StartCoroutine(PhysicalManipulation.Rotate(transform, transform.rotation, Quaternion.identity, 1f));
 			foreach(ObjectPart obj in parts)
 			{
 				if(obj != part)
@@ -89,11 +93,13 @@ namespace AssembleObject
 			}
 			selectedPart = part;
 			selectedPart.GetSelected();
-			UIManager.ins.ShowPartPanel(part.name);
+			UIManager.ins.ShowPartPanel(part.soundName);
 		}
 
 		public void DisselectPart()
 		{
+			//StopAllCoroutines();
+			//StartCoroutine(PhysicalManipulation.Rotate(transform, transform.rotation, startRotation, 1f));
 			foreach(ObjectPart obj in parts)
 			{
 				obj.gameObject.SetActive(true);
@@ -135,11 +141,16 @@ namespace AssembleObject
 
 				if(Input.touchCount == 1 && touch0.phase == TouchPhase.Moved)
 				{
-					if(Mathf.Abs(touch0.deltaPosition.x) > Mathf.Abs(touch0.deltaPosition.y))
-					{
-						transform.RotateAround(transform.position, transform.up, -touch0.deltaPosition.x * rotateSpeed * Time.deltaTime);
-						//Debug.Log("Touch0.x: " + firstTouch.deltaPosition.x);
-					}
+					//if(Mathf.Abs(touch0.deltaPosition.x) > Mathf.Abs(touch0.deltaPosition.y))
+					//{
+					//	transform.RotateAround(transform.position, transform.up, -touch0.deltaPosition.x * rotateSpeed * Time.deltaTime);
+					//	//Debug.Log("Touch0.x: " + firstTouch.deltaPosition.x);
+					//}
+					float rotX = touch0.deltaPosition.x * rotateSpeed * Mathf.Deg2Rad;
+					//float rotY = touch0.deltaPosition.y * rotateSpeed * Mathf.Deg2Rad;
+
+					transform.RotateAround(transform.position, Vector3.up, -rotX);
+					//transform.RotateAround(transform.position, Vector3.right, rotY);
 				}
 
 				if(Input.touchCount == 2)

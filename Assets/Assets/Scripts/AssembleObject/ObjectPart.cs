@@ -7,17 +7,20 @@ namespace AssembleObject
 	public class ObjectPart : MonoBehaviour
 	{
 
+		[HideInInspector]
 		public bool selected = false;
 
-		[SerializeField]
-		private string partName;
-		[SerializeField]
-		private AudioSource sound;
+		public string soundName;
+
 		[Header("Disassemble properties")]
 		[SerializeField]
 		private Vector3 disassemblePosition;
 		[SerializeField]
 		private Vector3 disassembleRotation;
+
+		[Header("Settings")]
+		private float soundRecoil = 2f;
+		private float soundCooldown;
 
 		private Vector3 startPosition;
 		private float rotateSpeed;
@@ -38,15 +41,20 @@ namespace AssembleObject
 			rotateSpeed = myObjectMain.rotateSpeed;
 			gameObject.layer = LayerMask.NameToLayer("ObjectPart");
 			startPosition = transform.localPosition;
+			soundCooldown = soundRecoil;
 			//disassemblePosition += transform.localPosition;
 		}
 
 		private void Update()
 		{
-			//HandleTouch();
+			HandleTouch();
 			if(disassembled)
 			{
 				transform.RotateAround(transform.position, Vector3.up, rotateSpeed * Time.deltaTime);
+			}
+			if(soundCooldown >= 0)
+			{
+				soundCooldown -= Time.deltaTime;
 			}
 		}
 
@@ -61,8 +69,9 @@ namespace AssembleObject
 		{
 			//history.SaveState(new PartMemento(transform.localPosition));
 			StopAllCoroutines();
-			StartCoroutine(PhysicalManipulation.Move(transform, transform.localPosition, UIManager.ins.partPositionOnPanel, 1f));
+			StartCoroutine(PhysicalManipulation.Move(transform, transform.position, UIManager.ins.partPositionOnPanel, UIManager.ins.movementTime));
 			selected = true;
+			//PlaySound();
 		}
 		private void Disselect()
 		{
@@ -74,21 +83,32 @@ namespace AssembleObject
 		public void GetDisselected()
 		{
 			StopAllCoroutines();
-			StartCoroutine(PhysicalManipulation.Move(transform, transform.localPosition, disassemblePosition, 1f));
+			StartCoroutine(PhysicalManipulation.LocalMove(transform, transform.localPosition, disassemblePosition, UIManager.ins.movementTime));
 			//StartCoroutine(PhysicalManipulation.Rotate(transform, transform.localRotation, Quaternion.Euler(disassembleRotation), 1f));
 			selected = false;
 		}
 
-		//private void HandleTouch()
-		//{
-		//	if(disassembled && Input.touchCount > 0)
-		//	{
-		//		if(Input.GetTouch(0).phase == TouchPhase.Began)
-		//		{
-		//			CheckTouch(Input.GetTouch(0).position);
-		//		}
-		//	}
-		//}
+		private void HandleTouch()
+		{
+			if(Input.touchCount > 0 && disassembled && selected)
+			{
+				Touch touch0 = Input.GetTouch(0);
+
+				if(Input.touchCount == 1 && touch0.phase == TouchPhase.Moved)
+				{
+					//if(Mathf.Abs(touch0.deltaPosition.x) > Mathf.Abs(touch0.deltaPosition.y))
+					//{
+					//	transform.RotateAround(transform.position, transform.up, -touch0.deltaPosition.x * rotateSpeed * Time.deltaTime);
+					//	//Debug.Log("Touch0.x: " + firstTouch.deltaPosition.x);
+					//}
+					float rotX = touch0.deltaPosition.x * rotateSpeed * Mathf.Deg2Rad;
+					float rotY = touch0.deltaPosition.y * rotateSpeed * Mathf.Deg2Rad;
+
+					transform.RotateAround(transform.position, Vector3.up, -rotX);
+					transform.RotateAround(transform.position, Vector3.right, rotY);
+				}
+			}
+		}
 
 		//private void CheckTouch(Vector2 pos)
 		//{
@@ -117,8 +137,8 @@ namespace AssembleObject
 			//if(history.IsEmpty())
 			//	return;
 			StopAllCoroutines();
-			StartCoroutine(PhysicalManipulation.Move(transform, transform.localPosition, startPosition, 1f));
-			StartCoroutine(PhysicalManipulation.Rotate(transform, transform.localRotation, Quaternion.identity, 1f));
+			StartCoroutine(PhysicalManipulation.LocalMove(transform, transform.localPosition, startPosition, UIManager.ins.movementTime));
+			StartCoroutine(PhysicalManipulation.LocalRotate(transform, transform.localRotation, Quaternion.identity, UIManager.ins.movementTime));
 			myCollider.enabled = false;
 			disassembled = false;
 		}
@@ -127,8 +147,17 @@ namespace AssembleObject
 		{
 			//StartCoroutine(Move(transform.position, new Vector3(Random.Range(-15, 5), Random.Range(-15, 5), transform.position.z), 1f));
 			StopAllCoroutines();
-			StartCoroutine(PhysicalManipulation.Move(transform, transform.localPosition, disassemblePosition, 1f));
-			StartCoroutine(PhysicalManipulation.Rotate(transform, transform.localRotation, Quaternion.Euler(disassembleRotation), 1f));
+			StartCoroutine(PhysicalManipulation.LocalMove(transform, transform.localPosition, disassemblePosition, UIManager.ins.movementTime));
+			StartCoroutine(PhysicalManipulation.LocalRotate(transform, transform.localRotation, Quaternion.Euler(disassembleRotation), UIManager.ins.movementTime));
+		}
+
+		public void PlaySound()
+		{
+			if(soundCooldown<=0)
+			{
+				AudioManager.ins.Play(soundName);
+				soundCooldown = soundRecoil;
+			}
 		}
 	}
 }

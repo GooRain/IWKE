@@ -77,12 +77,15 @@ public class CategoryPanel : MonoBehaviour
 		Destroy(currentGO);
 		currentGO = Instantiate(selectedObject.Value, transform);
 		currentGO.transform.position = new Vector3(transform.position.x, transform.position.y - 5f, transform.position.z - 70f);
-		objectName.text = currentGO.GetComponent<ObjectMain>().Name.ToUpper();
+		string currentObjectName = currentGO.GetComponent<ObjectMain>().soundName;
+		objectName.text = currentObjectName.ToUpper();
+		AudioManager.ins.Play(currentObjectName);
 	}
 
 	private void Clear()
 	{
 		objects.Clear();
+		partPanel.Hide();
 		Destroy(currentGO);
 	}
 

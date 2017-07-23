@@ -26,6 +26,7 @@ public class UIManager : MonoBehaviour
 	private Text partPanelText;
 
 	public Vector3 partPositionOnPanel;
+	public float movementTime;
 
 	public void ShowPartPanel(string name)
 	{

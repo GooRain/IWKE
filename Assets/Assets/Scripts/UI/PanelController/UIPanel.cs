@@ -30,6 +30,6 @@ public class UIPanel : MonoBehaviour, IUserInterfaceElement
 	{
 		//UIAnimator.SetTrigger("Close");
 		UIAnimator.SetBool("IsOpen", false);
-		//OnHide();
+		OnHide();
 	}
 }
