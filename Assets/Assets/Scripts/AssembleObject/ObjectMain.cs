@@ -7,12 +7,9 @@ namespace AssembleObject
 
 	public class ObjectMain : MonoBehaviour
 	{
-
-		public string soundName;
-
-		public float rotateSpeed = 5f;
-		[SerializeField]
-		private float doubleTapRecoil = 0.25f;
+		[SerializeField] private string soundName;
+		[SerializeField] private float rotateSpeed = 5f;
+		[SerializeField] private float doubleTapRecoil = 0.25f;
 
 		private float doubleTapCurrentRecoil;
 		private int tapCount = 0;
@@ -24,6 +21,32 @@ namespace AssembleObject
 
 		private BoxCollider myCollider;
 		private Quaternion startRotation;
+
+		public float RotateSpeed
+		{
+			get
+			{
+				return rotateSpeed;
+			}
+
+			private set
+			{
+				rotateSpeed = value;
+			}
+		}
+
+		public string SoundName
+		{
+			get
+			{
+				return soundName;
+			}
+
+			set
+			{
+				soundName = value;
+			}
+		}
 
 		private void Awake()
 		{
@@ -106,7 +129,7 @@ namespace AssembleObject
 			}
 			if(selectedPart != null)
 			{
-				selectedPart.GetDisselected();
+				selectedPart.GetUnSelected();
 			}
 			UIManager.ins.HidePartPanel();
 		}

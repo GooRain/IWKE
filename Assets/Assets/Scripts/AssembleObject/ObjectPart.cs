@@ -6,28 +6,42 @@ namespace AssembleObject
 
 	public class ObjectPart : MonoBehaviour
 	{
+		enum States { Idle, Assembling, DisAssembling, Selecting, UnSelecting };
+		States currentState = States.Idle;
 
-		[HideInInspector]
-		public bool selected = false;
+		private bool selected = false;
+		private bool disassembled = false;
 
 		public string soundName;
 
 		[Header("Disassemble properties")]
-		[SerializeField]
-		private Vector3 disassemblePosition;
-		[SerializeField]
-		private Vector3 disassembleRotation;
+		[SerializeField] private Vector3 disassemblePosition;
+		[SerializeField] private Vector3 disassembleRotation;
 
 		[Header("Settings")]
-		private float soundRecoil = 2f;
+
+		private float soundRecoil = 1f;
 		private float soundCooldown;
 
-		private Vector3 startPosition;
+		private Vector3 startLocalPosition;
 		private float rotateSpeed;
 		//private PartHistory history;
-		private bool disassembled = false;
+
 		private BoxCollider myCollider;
 		private ObjectMain myObjectMain;
+
+		public bool Selected
+		{
+			get
+			{
+				return selected;
+			}
+
+			private set
+			{
+				selected = value;
+			}
+		}
 
 		private void Start()
 		{
@@ -38,9 +52,9 @@ namespace AssembleObject
 				myCollider.enabled = false;
 			}
 			myObjectMain = GetComponentInParent<ObjectMain>();
-			rotateSpeed = myObjectMain.rotateSpeed;
+			rotateSpeed = myObjectMain.RotateSpeed;
 			gameObject.layer = LayerMask.NameToLayer("ObjectPart");
-			startPosition = transform.localPosition;
+			startLocalPosition = transform.localPosition;
 			soundCooldown = soundRecoil;
 			//disassemblePosition += transform.localPosition;
 		}
@@ -62,6 +76,7 @@ namespace AssembleObject
 		{
 			if(disassembled)
 			{
+				currentState = States.Selecting;
 				myObjectMain.SelectPart(this);
 			}
 		}
@@ -69,23 +84,25 @@ namespace AssembleObject
 		{
 			//history.SaveState(new PartMemento(transform.localPosition));
 			StopAllCoroutines();
-			StartCoroutine(PhysicalManipulation.Move(transform, transform.position, UIManager.ins.partPositionOnPanel, UIManager.ins.movementTime));
-			selected = true;
+			StartCoroutine(PhysicalManipulation.Move(transform, transform.position, UIManager.ins.PartPositionOnPanel, UIManager.ins.MovementTime));
+			//selected = true;
 			//PlaySound();
 		}
-		private void Disselect()
+		private void UnSelect()
 		{
 			if(disassembled)
 			{
+				currentState = States.UnSelecting;
 				myObjectMain.DisselectPart();
 			}
 		}
-		public void GetDisselected()
+		public void GetUnSelected()
 		{
+			//currentState = States.UnSelecting;
 			StopAllCoroutines();
-			StartCoroutine(PhysicalManipulation.LocalMove(transform, transform.localPosition, disassemblePosition, UIManager.ins.movementTime));
+			StartCoroutine(PhysicalManipulation.LocalMove(transform, transform.localPosition, disassemblePosition, UIManager.ins.MovementTime));
 			//StartCoroutine(PhysicalManipulation.Rotate(transform, transform.localRotation, Quaternion.Euler(disassembleRotation), 1f));
-			selected = false;
+			//selected = false;
 		}
 
 		private void HandleTouch()
@@ -129,7 +146,7 @@ namespace AssembleObject
 			//history.SaveState(new PartMemento(transform.localPosition));
 			StartDisassemble();
 			myCollider.enabled = true;
-			disassembled = true;
+			//disassembled = true;
 		}
 
 		public void Assemble()
@@ -137,27 +154,51 @@ namespace AssembleObject
 			//if(history.IsEmpty())
 			//	return;
 			StopAllCoroutines();
-			StartCoroutine(PhysicalManipulation.LocalMove(transform, transform.localPosition, startPosition, UIManager.ins.movementTime));
-			StartCoroutine(PhysicalManipulation.LocalRotate(transform, transform.localRotation, Quaternion.identity, UIManager.ins.movementTime));
+			currentState = States.Assembling;
+			StartCoroutine(PhysicalManipulation.LocalMove(transform, transform.localPosition, startLocalPosition, UIManager.ins.MovementTime));
+			StartCoroutine(PhysicalManipulation.LocalRotate(transform, transform.localRotation, Quaternion.identity, UIManager.ins.MovementTime));
 			myCollider.enabled = false;
-			disassembled = false;
+			//disassembled = false;
 		}
 
 		private void StartDisassemble()
 		{
 			//StartCoroutine(Move(transform.position, new Vector3(Random.Range(-15, 5), Random.Range(-15, 5), transform.position.z), 1f));
 			StopAllCoroutines();
-			StartCoroutine(PhysicalManipulation.LocalMove(transform, transform.localPosition, disassemblePosition, UIManager.ins.movementTime));
-			StartCoroutine(PhysicalManipulation.LocalRotate(transform, transform.localRotation, Quaternion.Euler(disassembleRotation), UIManager.ins.movementTime));
+			currentState = States.DisAssembling;
+			StartCoroutine(PhysicalManipulation.LocalMove(transform, transform.localPosition, disassemblePosition, UIManager.ins.MovementTime));
+			StartCoroutine(PhysicalManipulation.LocalRotate(transform, transform.localRotation, Quaternion.Euler(disassembleRotation), UIManager.ins.MovementTime));
 		}
 
 		public void PlaySound()
 		{
-			if(soundCooldown<=0)
+			if(soundCooldown <= 0 && currentState == States.Idle)
 			{
 				AudioManager.ins.Play(soundName);
 				soundCooldown = soundRecoil;
 			}
+		}
+
+		public void OnCoroutineEnd()
+		{
+			switch(currentState)
+			{
+				case States.Assembling:
+					disassembled = false;
+					break;
+				case States.DisAssembling:
+					disassembled = true;
+					break;
+				case States.Selecting:
+					selected = true;
+					break;
+				case States.UnSelecting:
+					selected = false;
+					break;
+				default:
+					break;
+			}
+			currentState = States.Idle;
 		}
 	}
 }

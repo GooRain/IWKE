@@ -20,13 +20,36 @@ public class UIManager : MonoBehaviour
 		}
 	}
 
-	[SerializeField]
-	private UIPanel partPanel;
-	[SerializeField]
-	private Text partPanelText;
+	[SerializeField] private UIPanel partPanel;
+	[SerializeField] private Text partPanelText;
 
-	public Vector3 partPositionOnPanel;
-	public float movementTime;
+	[SerializeField] private Vector3 partPositionOnPanel;
+	[SerializeField] private float movementTime;
+
+	public Vector3 PartPositionOnPanel
+	{
+		get
+		{
+			return partPositionOnPanel;
+		}
+
+		set
+		{
+			partPositionOnPanel = value;
+		}
+	}
+	public float MovementTime
+	{
+		get
+		{
+			return movementTime;
+		}
+
+		set
+		{
+			movementTime = value;
+		}
+	}
 
 	public void ShowPartPanel(string name)
 	{

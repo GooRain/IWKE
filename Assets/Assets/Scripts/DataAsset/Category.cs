@@ -8,4 +8,5 @@ public class Category : ScriptableObject {
 	public List<GameObject> prefabs;
 	public Color BackgroundColor;
 	public Sprite Icon;
+
 }

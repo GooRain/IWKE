@@ -22,6 +22,7 @@ public class PhysicalManipulation
 			yield return null;
 		}
 		transform.localPosition = endPos;
+		transform.SendMessage("OnCoroutineEnd");
 	}
 
 	/// <summary>
@@ -60,6 +61,7 @@ public class PhysicalManipulation
 			yield return null;
 		}
 		transform.position = endPos;
+		transform.SendMessage("OnCoroutineEnd");
 	}
 
 	/// <summary>

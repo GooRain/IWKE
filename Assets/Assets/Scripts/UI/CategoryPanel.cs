@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class CategoryPanel : MonoBehaviour
 {
 
-	public UIPanel partPanel;
+	[SerializeField] private UIPanel partPanel;
 
 	[SerializeField] private Text categoryName;
 	[SerializeField] private Text objectName;
@@ -17,6 +17,7 @@ public class CategoryPanel : MonoBehaviour
 	private LinkedList<GameObject> objects = new LinkedList<GameObject>();
 	private LinkedListNode<GameObject> selectedObject;
 	private GameObject currentGO;
+
 	public Image Background
 	{
 		get
@@ -28,6 +29,19 @@ public class CategoryPanel : MonoBehaviour
 		set
 		{
 			background = value;
+		}
+	}
+
+	public UIPanel PartPanel
+	{
+		get
+		{
+			return partPanel;
+		}
+
+		set
+		{
+			partPanel = value;
 		}
 	}
 
@@ -74,10 +88,11 @@ public class CategoryPanel : MonoBehaviour
 
 	public void ShowObject()
 	{
+		partPanel.Hide();
 		Destroy(currentGO);
 		currentGO = Instantiate(selectedObject.Value, transform);
 		currentGO.transform.position = new Vector3(transform.position.x, transform.position.y - 5f, transform.position.z - 70f);
-		string currentObjectName = currentGO.GetComponent<ObjectMain>().soundName;
+		string currentObjectName = currentGO.GetComponent<ObjectMain>().SoundName;
 		objectName.text = currentObjectName.ToUpper();
 		AudioManager.ins.Play(currentObjectName);
 	}

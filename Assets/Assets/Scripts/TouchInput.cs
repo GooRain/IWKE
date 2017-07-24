@@ -5,11 +5,12 @@ using UnityEngine;
 public class TouchInput : MonoBehaviour
 {
 
-	public LayerMask objectPartTouchInputMask;
+	[SerializeField] private LayerMask objectPartTouchInputMask;
 
 	private float doubleTapRecoil = 0.25f;
 	private float doubleTapCooldown;
 	private int tapCount = 0;
+	private GameObject recipient;
 
 	private void Update()
 	{
@@ -22,28 +23,32 @@ public class TouchInput : MonoBehaviour
 
 				if(Physics.Raycast(ray, out hit, objectPartTouchInputMask))
 				{
-					GameObject recipient = hit.transform.gameObject;
+					recipient = hit.transform.gameObject;
 
 					if(touch.phase == TouchPhase.Ended)
 					{
 						if(recipient.GetComponent<AssembleObject.ObjectPart>())
 						{
-							if(doubleTapCooldown > 0 && tapCount >= 1)
+							if(doubleTapCooldown > 0)
 							{
-								if(recipient.GetComponent<AssembleObject.ObjectPart>().selected)
+								tapCount++;
+								if(tapCount >= 2)
 								{
-									recipient.SendMessage("Disselect");
-								}
-								else
-								{
-									recipient.SendMessage("Select");
+									if(recipient.GetComponent<AssembleObject.ObjectPart>().Selected)
+									{
+										recipient.SendMessage("UnSelect");
+									}
+									else
+									{
+										recipient.SendMessage("Select");
+									}
+									//doubleTapCooldown = doubleTapRecoil;
 								}
 							}
 							else
 							{
-								recipient.SendMessage("PlaySound");
-								doubleTapCooldown = doubleTapRecoil;
 								tapCount++;
+								doubleTapCooldown = doubleTapRecoil;
 							}
 						}
 					}
@@ -51,12 +56,16 @@ public class TouchInput : MonoBehaviour
 			}
 		}
 
-		if(doubleTapCooldown > 0)
+		if(doubleTapCooldown >= 0)
 		{
 			doubleTapCooldown -= Time.deltaTime;
 		}
 		else
 		{
+			if(recipient != null && recipient.GetComponent<AssembleObject.ObjectPart>() && tapCount == 1)
+			{
+				recipient.SendMessage("PlaySound");
+			}
 			tapCount = 0;
 		}
 	}
