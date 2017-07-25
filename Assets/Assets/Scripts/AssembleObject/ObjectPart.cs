@@ -15,7 +15,8 @@ namespace AssembleObject
 		public string soundName;
 
 		[Header("Disassemble properties")]
-		[SerializeField] private Vector3 disassemblePosition;
+		[SerializeField]
+		private Vector3 disassemblePosition;
 		[SerializeField] private Vector3 disassembleRotation;
 
 		[Header("Settings")]
@@ -24,11 +25,12 @@ namespace AssembleObject
 		private float soundCooldown;
 
 		private Vector3 startLocalPosition;
-		private float rotateSpeed;
+		//private float rotateSpeed;
 		//private PartHistory history;
 
 		private BoxCollider myCollider;
 		private ObjectMain myObjectMain;
+		private GlowObject myGlowObject;
 
 		public bool Selected
 		{
@@ -52,7 +54,7 @@ namespace AssembleObject
 				myCollider.enabled = false;
 			}
 			myObjectMain = GetComponentInParent<ObjectMain>();
-			rotateSpeed = myObjectMain.RotateSpeed;
+			myGlowObject = GetComponentInChildren<GlowObject>();
 			gameObject.layer = LayerMask.NameToLayer("ObjectPart");
 			startLocalPosition = transform.localPosition;
 			soundCooldown = soundRecoil;
@@ -61,10 +63,10 @@ namespace AssembleObject
 
 		private void Update()
 		{
-			HandleTouch();
+			//HandleTouch();
 			if(disassembled)
 			{
-				transform.RotateAround(transform.position, Vector3.up, rotateSpeed * Time.deltaTime);
+				transform.RotateAround(transform.position, Vector3.up, UIManager.ins.RotateSpeed * Time.deltaTime);
 			}
 			if(soundCooldown >= 0)
 			{
@@ -96,6 +98,7 @@ namespace AssembleObject
 				myObjectMain.DisselectPart();
 			}
 		}
+
 		public void GetUnSelected()
 		{
 			//currentState = States.UnSelecting;
@@ -105,27 +108,33 @@ namespace AssembleObject
 			//selected = false;
 		}
 
-		private void HandleTouch()
+		public void RotateAround(float rotX, float rotY)
 		{
-			if(Input.touchCount > 0 && disassembled && selected)
-			{
-				Touch touch0 = Input.GetTouch(0);
-
-				if(Input.touchCount == 1 && touch0.phase == TouchPhase.Moved)
-				{
-					//if(Mathf.Abs(touch0.deltaPosition.x) > Mathf.Abs(touch0.deltaPosition.y))
-					//{
-					//	transform.RotateAround(transform.position, transform.up, -touch0.deltaPosition.x * rotateSpeed * Time.deltaTime);
-					//	//Debug.Log("Touch0.x: " + firstTouch.deltaPosition.x);
-					//}
-					float rotX = touch0.deltaPosition.x * rotateSpeed * Mathf.Deg2Rad;
-					float rotY = touch0.deltaPosition.y * rotateSpeed * Mathf.Deg2Rad;
-
-					transform.RotateAround(transform.position, Vector3.up, -rotX);
-					transform.RotateAround(transform.position, Vector3.right, rotY);
-				}
-			}
+			transform.RotateAround(transform.position, Vector3.up, -rotX);
+			transform.RotateAround(transform.position, Vector3.right, rotY);
 		}
+
+		//private void HandleTouch()
+		//{
+		//	if(Input.touchCount > 0 && disassembled)
+		//	{
+		//		Touch touch0 = Input.GetTouch(0);
+
+		//		if(Input.touchCount == 1 && touch0.phase == TouchPhase.Moved)
+		//		{
+		//			//if(Mathf.Abs(touch0.deltaPosition.x) > Mathf.Abs(touch0.deltaPosition.y))
+		//			//{
+		//			//	transform.RotateAround(transform.position, transform.up, -touch0.deltaPosition.x * rotateSpeed * Time.deltaTime);
+		//			//	//Debug.Log("Touch0.x: " + firstTouch.deltaPosition.x);
+		//			//}
+		//			float rotX = touch0.deltaPosition.x * rotateSpeed * Mathf.Deg2Rad;
+		//			float rotY = touch0.deltaPosition.y * rotateSpeed * Mathf.Deg2Rad;
+
+		//			transform.RotateAround(transform.position, Vector3.up, -rotX);
+		//			transform.RotateAround(transform.position, Vector3.right, rotY);
+		//		}
+		//	}
+		//}
 
 		//private void CheckTouch(Vector2 pos)
 		//{
@@ -190,9 +199,11 @@ namespace AssembleObject
 					disassembled = true;
 					break;
 				case States.Selecting:
+					myGlowObject.GlowOn();
 					selected = true;
 					break;
 				case States.UnSelecting:
+					myGlowObject.GlowOff();
 					selected = false;
 					break;
 				default:

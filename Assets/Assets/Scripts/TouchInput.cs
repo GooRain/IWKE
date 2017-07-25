@@ -1,6 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using AssembleObject;
 
 public class TouchInput : MonoBehaviour
 {
@@ -10,47 +9,61 @@ public class TouchInput : MonoBehaviour
 	private float doubleTapRecoil = 0.25f;
 	private float doubleTapCooldown;
 	private int tapCount = 0;
-	private GameObject recipient;
+	private ObjectPart part;
+	private bool isPartRotating = false;
 
 	private void Update()
+	{
+		HandleTouch();
+	}
+
+	private void HandleTouch()
 	{
 		if(Input.touchCount > 0)
 		{
 			foreach(Touch touch in Input.touches)
 			{
-				Ray ray = Camera.main.ScreenPointToRay(touch.position);
 				RaycastHit hit;
-
-				if(Physics.Raycast(ray, out hit, objectPartTouchInputMask))
+				if(touch.phase == TouchPhase.Began && IsHitObjectPart(touch, out hit))
 				{
-					recipient = hit.transform.gameObject;
+					part = hit.transform.gameObject.GetComponent<ObjectPart>();
+					isPartRotating = true;
+				}
 
-					if(touch.phase == TouchPhase.Ended)
+				if(isPartRotating)
+				{
+					if(touch.phase == TouchPhase.Moved)
 					{
-						if(recipient.GetComponent<AssembleObject.ObjectPart>())
+						float rotX = touch.deltaPosition.x * UIManager.ins.RotateSpeed * Mathf.Deg2Rad;
+						float rotY = touch.deltaPosition.y * UIManager.ins.RotateSpeed * Mathf.Deg2Rad;
+
+						part.RotateAround(rotX, rotY);
+					}
+
+					if(touch.phase == TouchPhase.Ended && IsHitObjectPart(touch))
+					{
+						if(doubleTapCooldown > 0)
 						{
-							if(doubleTapCooldown > 0)
+							tapCount++;
+							if(tapCount >= 2)
 							{
-								tapCount++;
-								if(tapCount >= 2)
+								if(part.Selected)
 								{
-									if(recipient.GetComponent<AssembleObject.ObjectPart>().Selected)
-									{
-										recipient.SendMessage("UnSelect");
-									}
-									else
-									{
-										recipient.SendMessage("Select");
-									}
-									//doubleTapCooldown = doubleTapRecoil;
+									part.SendMessage("UnSelect");
 								}
-							}
-							else
-							{
-								tapCount++;
-								doubleTapCooldown = doubleTapRecoil;
+								else
+								{
+									part.SendMessage("Select");
+								}
+								//doubleTapCooldown = doubleTapRecoil;
 							}
 						}
+						else
+						{
+							tapCount++;
+							doubleTapCooldown = doubleTapRecoil;
+						}
+						isPartRotating = false;
 					}
 				}
 			}
@@ -62,11 +75,38 @@ public class TouchInput : MonoBehaviour
 		}
 		else
 		{
-			if(recipient != null && recipient.GetComponent<AssembleObject.ObjectPart>() && tapCount == 1)
+			if(part != null && tapCount == 1)
 			{
-				recipient.SendMessage("PlaySound");
+				part.SendMessage("PlaySound");
 			}
 			tapCount = 0;
 		}
 	}
+
+	private bool IsHitObjectPart(Touch touch, out RaycastHit _hit)
+	{
+		Ray ray = Camera.main.ScreenPointToRay(touch.position);
+		RaycastHit hit;
+
+		if(Physics.Raycast(ray, out hit, 100f, objectPartTouchInputMask))
+		{
+			_hit = hit;
+			return true;
+		}
+		_hit = new RaycastHit();
+		return false;
+	}
+
+	private bool IsHitObjectPart(Touch touch)
+	{
+		Ray ray = Camera.main.ScreenPointToRay(touch.position);
+		RaycastHit hit;
+
+		if(Physics.Raycast(ray, out hit, 100f, objectPartTouchInputMask))
+		{
+			return true;
+		}
+		return false;
+	}
+
 }

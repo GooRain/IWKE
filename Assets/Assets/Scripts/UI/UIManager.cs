@@ -20,11 +20,17 @@ public class UIManager : MonoBehaviour
 		}
 	}
 
+
 	[SerializeField] private UIPanel partPanel;
 	[SerializeField] private Text partPanelText;
-
+	
+	[Header("Glow Settings")]
+	[SerializeField] private Color glowColor;
+	[SerializeField] private float rimPower;
+	[Header("Objects Settings")]
 	[SerializeField] private Vector3 partPositionOnPanel;
 	[SerializeField] private float movementTime;
+	[SerializeField] private float rotateSpeed;
 
 	public Vector3 PartPositionOnPanel
 	{
@@ -48,6 +54,42 @@ public class UIManager : MonoBehaviour
 		set
 		{
 			movementTime = value;
+		}
+	}
+	public Color GlowColor
+	{
+		get
+		{
+			return glowColor;
+		}
+
+		set
+		{
+			glowColor = value;
+		}
+	}
+	public float RotateSpeed
+	{
+		get
+		{
+			return rotateSpeed;
+		}
+
+		set
+		{
+			rotateSpeed = value;
+		}
+	}
+	public float RimPower
+	{
+		get
+		{
+			return rimPower;
+		}
+
+		set
+		{
+			rimPower = value;
 		}
 	}
 
