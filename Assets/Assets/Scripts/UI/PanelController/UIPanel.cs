@@ -32,4 +32,17 @@ public class UIPanel : MonoBehaviour, IUserInterfaceElement
 		UIAnimator.SetBool("IsOpen", false);
 		OnHide();
 	}
+
+	public void Toggle()
+	{
+		if(UIAnimator.GetBool("IsOpen"))
+		{
+			Hide();
+		}
+		else
+		{
+			Show();
+		}
+	}
+
 }

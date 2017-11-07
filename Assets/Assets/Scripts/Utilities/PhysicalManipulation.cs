@@ -42,6 +42,27 @@ public class PhysicalManipulation
 			yield return null;
 		}
 		transform.localRotation = endRot;
+		transform.SendMessage("OnCoroutineEnd");
+	}
+
+	/// <summary>
+	/// Lerping Transform's LOCAL SCALE from startScale to endScale
+	/// </summary>
+	/// <param name="transform"></param>
+	/// <param name="startRot"></param>
+	/// <param name="endRot"></param>
+	/// <param name="during"></param>
+	/// <returns></returns>
+	public static IEnumerator LocalScale(Transform transform, Vector3 startScale, Vector3 endScale, float during)
+	{
+		float startTime = Time.time;
+		while(Time.time < startTime + during)
+		{
+			transform.localScale = Vector3.Lerp(startScale, endScale, (Time.time - startTime) / during);
+			yield return null;
+		}
+		transform.localScale = endScale;
+		transform.SendMessage("OnCoroutineEnd");
 	}
 
 	/// <summary>
@@ -81,5 +102,6 @@ public class PhysicalManipulation
 			yield return null;
 		}
 		transform.rotation = endRot;
+		transform.SendMessage("OnCoroutineEnd");
 	}
 }

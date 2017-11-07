@@ -1,34 +1,53 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
 
 public class GlowObject : MonoBehaviour
 {
 
-	private List<Material> materials = new List<Material>();
+	public bool isTransparent = false;
+
+	//private List<Material> materials = new List<Material>();
+	private Renderer myRenderer;
 
 	private void Start()
 	{
-		foreach(Material mat in GetComponent<MeshRenderer>().sharedMaterials)
+		myRenderer = GetComponent<Renderer>();
+		if(!isTransparent)
 		{
-			materials.Add(mat);
-			mat.SetColor("Rim Color", UIManager.ins.GlowColor);
+			foreach(Material mat in myRenderer.materials)
+			{
+				Color previousColor = mat.GetColor("_Color");
+				mat.shader = Shader.Find("Outlined/Silhouetted Bumped Mobile");
+				mat.SetColor("_Color", previousColor);
+				mat.SetColor("_OutlineColor", UIManager.ins.OutlineColor);
+				//mat.SetColor("_EmissionColor", UIManager.ins.GlowColor);
+			}
+			GlowOff();
 		}
-		GlowOff();
 	}
 
 	public void GlowOn()
 	{
-		foreach(Material mat in materials)
+		if(!isTransparent)
 		{
-			mat.SetFloat("Rim Power", 10f);
+			foreach(Material mat in myRenderer.materials)
+			{
+				mat.SetFloat("_Outline", UIManager.ins.OutlineWidth / transform.localScale.x);
+				mat.SetColor("_OutlineColor", UIManager.ins.OutlineColor);
+			}
+			Debug.Log("Outline on");
 		}
 	}
 
 	public void GlowOff()
 	{
-		foreach(Material mat in materials)
+		if(!isTransparent)
 		{
-			mat.SetFloat("Rim Power", 2.5f);
+			foreach(Material mat in myRenderer.materials)
+			{
+				mat.SetFloat("_Outline", 0f);
+				mat.SetColor("_OutlineColor", Color.clear);
+			}
+			Debug.Log("Outline off");
 		}
 	}
 

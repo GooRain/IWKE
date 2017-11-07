@@ -10,13 +10,14 @@ public class UIManager : MonoBehaviour
 
 	public void Awake()
 	{
-		if(!ins)
+		if(ins == null)
 		{
 			ins = this;
 		}
 		else
 		{
 			Destroy(gameObject);
+			return;
 		}
 	}
 
@@ -25,9 +26,11 @@ public class UIManager : MonoBehaviour
 	[SerializeField] private Text partPanelText;
 	
 	[Header("Glow Settings")]
-	[SerializeField] private Color glowColor;
-	[SerializeField] private float rimPower;
+	[SerializeField] private Color outlineColor;
+	[SerializeField] private float outlineWidth;
 	[Header("Objects Settings")]
+	[SerializeField] private float dualTouchLength;
+	[SerializeField] private float distanceToAssembledPosition;
 	[SerializeField] private Vector3 partPositionOnPanel;
 	[SerializeField] private float movementTime;
 	[SerializeField] private float rotateSpeed;
@@ -56,18 +59,6 @@ public class UIManager : MonoBehaviour
 			movementTime = value;
 		}
 	}
-	public Color GlowColor
-	{
-		get
-		{
-			return glowColor;
-		}
-
-		set
-		{
-			glowColor = value;
-		}
-	}
 	public float RotateSpeed
 	{
 		get
@@ -80,16 +71,52 @@ public class UIManager : MonoBehaviour
 			rotateSpeed = value;
 		}
 	}
-	public float RimPower
+	public Color OutlineColor
 	{
 		get
 		{
-			return rimPower;
+			return outlineColor;
 		}
 
 		set
 		{
-			rimPower = value;
+			outlineColor = value;
+		}
+	}
+	public float OutlineWidth
+	{
+		get
+		{
+			return outlineWidth;
+		}
+
+		set
+		{
+			outlineWidth = value;
+		}
+	}
+	public float DualTouchLength
+	{
+		get
+		{
+			return dualTouchLength;
+		}
+
+		set
+		{
+			dualTouchLength = value;
+		}
+	}
+	public float DistanceToAssembledPosition
+	{
+		get
+		{
+			return distanceToAssembledPosition;
+		}
+
+		set
+		{
+			distanceToAssembledPosition = value;
 		}
 	}
 
@@ -102,6 +129,16 @@ public class UIManager : MonoBehaviour
 	public void HidePartPanel()
 	{
 		partPanel.Hide();
+	}
+
+	public void ToggleMusic()
+	{
+		AudioManager.ins.ToggleMusic();
+	}
+
+	public void ExitGame()
+	{
+		Application.Quit();
 	}
 
 }

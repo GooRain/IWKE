@@ -4,29 +4,46 @@ using UnityEngine;
 using UnityEngine.UI;
 using IWKE;
 
-public class CategoryButton : MonoBehaviour {
+public class CategoryButton : MonoBehaviour
+{
 
 	[SerializeField] private Text buttonName;
 	[SerializeField] private Image icon;
 
+	private int index = 0;
 	private Button button;
 	private CategoryPanel categoryPanel;
 	private Category category;
 
-	private void Awake() {
+	private void Awake()
+	{
 		button = GetComponent<Button>();
-		button.onClick.AddListener(()=> OpenMenu());
+		button.onClick.AddListener(() => OpenMenu());
 	}
 
-	public void SetButton(Category category, CategoryPanel categoryPanel){
+	private void Start()
+	{
+		LangSystem.ins.OnLangChange += OnLangChange;
+		OnLangChange();
+	}
+
+	public void SetButton(int newIndex, Category category, CategoryPanel categoryPanel)
+	{
 		this.category = category;
 		this.categoryPanel = categoryPanel;
+		index = newIndex;
 		buttonName.text = category.CategoryName;
 		icon.sprite = category.Icon;
 	}
 
-	private void OpenMenu() {
-		categoryPanel.SetPanel(category);
+	public void OnLangChange()
+	{
+		buttonName.text = LangSystem.language.categories[index];
+	}
+
+	private void OpenMenu()
+	{
+		categoryPanel.SetPanel(index, category);
 		categoryPanel.gameObject.GetComponent<IUserInterfaceElement>().Show();
 	}
 }
